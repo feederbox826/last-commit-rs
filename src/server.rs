@@ -4,7 +4,7 @@ mod github;
 use std::sync::{Arc, RwLock};
 use tiny_http::{Server, Response, Header, StatusCode};
 
-const HELP_RESPONSE: &str = "fbox826/last-commit-rs\n\nUsage: /{owner}/{repo}[:{branch}]?[refresh=true][&raw=true]\nExample: /rust-lang/rust?refresh=true";
+const HELP_RESPONSE: &str = "fbox826/last-commit-rs\n\nUsage: /{owner}/{repo}[:{branch}]?[refresh=true]\nExample: /rust-lang/rust?refresh=true";
 
 struct AppState {
   cache: RwLock<cache::Cache>,
