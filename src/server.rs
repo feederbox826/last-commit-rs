@@ -32,8 +32,9 @@ fn handle(state: &AppState, req: tiny_http::Request) {
         if let Some(entry) = cache.get(name) {
           if !cache::is_expired(entry) {
             let header = Header::from_bytes("X-Cache", "HIT").unwrap();
+            let cache_header = Header::from_bytes("Cache-Control", "public, max-age=604800").unwrap();
             let body = entry.lastmod.clone();
-            req.respond(Response::from_string(body).with_header(header).with_header(CORS_HEADER.clone())).ok();
+            req.respond(Response::from_string(body).with_header(header).with_header(CORS_HEADER.clone()).with_header(cache_header)).ok();
             return;
           }
         }
