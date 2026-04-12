@@ -1,10 +1,14 @@
 mod cache;
 mod github;
 
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, LazyLock, RwLock};
 use tiny_http::{Server, Response, Header, StatusCode};
 
 const HELP_RESPONSE: &str = "fbox826/last-commit-rs\n\nUsage: /{owner}/{repo}[:{branch}]?[refresh=true]\nExample: /rust-lang/rust?refresh=true";
+
+static CORS_HEADER: LazyLock<Header> = LazyLock::new(|| {
+  Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap()
+});
 
 struct AppState {
   cache: RwLock<cache::Cache>,
@@ -29,7 +33,7 @@ fn handle(state: &AppState, req: tiny_http::Request) {
           if !cache::is_expired(entry) {
             let header = Header::from_bytes("X-Cache", "HIT").unwrap();
             let body = entry.lastmod.clone();
-            req.respond(Response::from_string(body).with_header(header)).ok();
+            req.respond(Response::from_string(body).with_header(header).with_header(CORS_HEADER.clone())).ok();
             return;
           }
         }
@@ -45,7 +49,7 @@ fn handle(state: &AppState, req: tiny_http::Request) {
 
       let header = Header::from_bytes("X-Cache", "MISS").unwrap();
       let date_str = date.unwrap_or_else(|| "null".to_string());
-      req.respond(Response::from_string(date_str).with_header(header)).ok();
+      req.respond(Response::from_string(date_str).with_header(header).with_header(CORS_HEADER.clone())).ok();
     }
   }
 }
